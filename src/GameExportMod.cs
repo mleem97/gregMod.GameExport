@@ -11,7 +11,7 @@ public class GameExportMod : MelonMod
 {
     internal static MelonPreferences_Entry<bool> EnabledEntry;
     internal static MelonPreferences_Entry<string> ExportKeyEntry;
-    private static UnityEngine.InputSystem.Key _exportKey = UnityEngine.InputSystem.Key.F12;
+    private static UnityEngine.InputSystem.Key _exportKey = UnityEngine.InputSystem.Key.F8;
     private static bool _exporting;
 
     public override void OnInitializeMelon()
@@ -19,7 +19,7 @@ public class GameExportMod : MelonMod
         var cat = MelonPreferences.CreateCategory("GameExport");
         EnabledEntry = cat.CreateEntry("Enabled", true, "Enabled",
             "Exportiert die VanillaReferenz nach ~/GameExport/{timestamp}/.");
-        ExportKeyEntry = cat.CreateEntry("ExportKey", "F12", "ExportKey",
+        ExportKeyEntry = cat.CreateEntry("ExportKey", "F8", "ExportKey",
             "Hotkey to export the vanilla reference.");
         try
         {
@@ -27,7 +27,7 @@ public class GameExportMod : MelonMod
                 && k != UnityEngine.InputSystem.Key.None)
                 _exportKey = k;
             else
-                MelonLogger.Warning($"[GameExport] Unknown ExportKey '{ExportKeyEntry.Value}', defaulting to F12.");
+                MelonLogger.Warning($"[GameExport] Unknown ExportKey '{ExportKeyEntry.Value}', defaulting to F8.");
         }
         catch { }
         MelonLogger.Msg($"[GameExport] Bereit. {_exportKey} = Export nach ~/GameExport/{{timestamp}}/.");
