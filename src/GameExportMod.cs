@@ -2,7 +2,7 @@ using MelonLoader;
 using UnityEngine;
 using greg.Mods.GameExport.Core;
 
-[assembly: MelonInfo(typeof(greg.Mods.GameExport.GameExportMod), "gregMod.GameExport", "1.0.0", "TeamGreg Modding")]
+[assembly: MelonInfo(typeof(greg.Mods.GameExport.GameExportMod), "gregMod.GameExport", "1.0.1", "TeamGreg Modding")]
 [assembly: MelonGame("Waseku", "Data Center")]
 
 namespace greg.Mods.GameExport;
@@ -11,7 +11,7 @@ public class GameExportMod : MelonMod
 {
     internal static MelonPreferences_Entry<bool> EnabledEntry;
     internal static MelonPreferences_Entry<string> ExportKeyEntry;
-    private static UnityEngine.InputSystem.Key _exportKey = UnityEngine.InputSystem.Key.F8;
+    private static UnityEngine.InputSystem.Key _exportKey = UnityEngine.InputSystem.Key.F12;
     private static bool _exporting;
 
     public override void OnInitializeMelon()
@@ -19,7 +19,7 @@ public class GameExportMod : MelonMod
         var cat = MelonPreferences.CreateCategory("GameExport");
         EnabledEntry = cat.CreateEntry("Enabled", true, "Enabled",
             "Exportiert die VanillaReferenz nach ~/GameExport/{timestamp}/.");
-        ExportKeyEntry = cat.CreateEntry("ExportKey", "F8", "ExportKey",
+        ExportKeyEntry = cat.CreateEntry("ExportKey", "F12", "ExportKey",
             "Hotkey to export the vanilla reference.");
         try
         {
@@ -27,7 +27,7 @@ public class GameExportMod : MelonMod
                 && k != UnityEngine.InputSystem.Key.None)
                 _exportKey = k;
             else
-                MelonLogger.Warning($"[GameExport] Unknown ExportKey '{ExportKeyEntry.Value}', defaulting to F8.");
+                MelonLogger.Warning($"[GameExport] Unknown ExportKey '{ExportKeyEntry.Value}', defaulting to F12.");
         }
         catch { }
         MelonLogger.Msg($"[GameExport] Bereit. {_exportKey} = Export nach ~/GameExport/{{timestamp}}/.");
@@ -44,7 +44,7 @@ public class GameExportMod : MelonMod
         try
         {
             gregCore.Core.Mods.GregModRegistry.Register(
-                "gregMod.GameExport", "GameExport", "1.0.0",
+                "gregMod.GameExport", "GameExport", "1.0.1",
                 new string[] { "gameexport" });
             gregCore.UI.GregHudRegistry.Register("gameexport", _exportKey.ToString(), "Export");
             gregCore.UI.GregMenuRegistry.RegisterOpener("gameexport", () => StartExport());

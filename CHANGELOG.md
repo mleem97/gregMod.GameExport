@@ -2,7 +2,12 @@
 
 Format: [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
-## [Unreleased]
+## [1.0.1] — 2026-09-24
+
+### Fixed
+
+- Default-Export-Key zurück auf F12 (F8 ist der GregCore-Settings-Hub);
+  bestehende cfgs behalten ihren Wert.
 
 ### Added
 
