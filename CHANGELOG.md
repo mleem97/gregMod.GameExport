@@ -2,8 +2,13 @@
 
 Format: [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
-## [Unreleased]
+## [1.0.1] — 2026-09-24
+
+### Fixed
+
+- Default export key back to F12 (F8 is the GregCore settings hub);
+  existing cfgs keep their value.
 
 ### Added
 
-- Konfigurierbarer Export-Hotkey (`ExportKey`-Pref, Default F12), Mod-Vertrag, Tasten-HUD-Eintrag und Export-Ausloeser fuers F1-Hub (nur mit gregCore).
+- Configurable export hotkey (`ExportKey` pref, default F12), mod contract, key-HUD entry, and export trigger for the F1 hub (only with gregCore).

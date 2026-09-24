@@ -53,7 +53,14 @@ public static class GameExporter
         yield return WriteSection(dir, "materials.md", WriteMaterials);
         yield return WriteSection(dir, "dependencies.mmd", WriteDependencies);
         MelonLogger.Msg("[GameExport] Done: " + dir);
+        if (GregHost.HasCore) NotifyExportDone(dir);
         try { onDone?.Invoke(); } catch { }
+    }
+
+    // Isolated method (JIT split): touches gregCore types, called only behind HasCore.
+    private static void NotifyExportDone(string dir)
+    {
+        try { gregCore.UI.GregNotificationManager.Show("Export done: " + dir, 4f); } catch { }
     }
 
     private static IEnumerator WriteSection(string dir, string file, Func<StringBuilder, IEnumerator> writer)
