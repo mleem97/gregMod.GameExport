@@ -2,7 +2,7 @@ using MelonLoader;
 using UnityEngine;
 using greg.Mods.GameExport.Core;
 
-[assembly: MelonInfo(typeof(greg.Mods.GameExport.GameExportMod), "gregMod.GameExport", "1.0.1", "TeamGreg Modding")]
+[assembly: MelonInfo(typeof(greg.Mods.GameExport.GameExportMod), "gregMod.GameExport", "1.0.2", "TeamGreg Modding")]
 [assembly: MelonGame("Waseku", "Data Center")]
 
 namespace greg.Mods.GameExport;
@@ -44,7 +44,7 @@ public class GameExportMod : MelonMod
         try
         {
             gregCore.Core.Mods.GregModRegistry.Register(
-                "gregMod.GameExport", "GameExport", "1.0.1",
+                "gregMod.GameExport", "GameExport", "1.0.2",
                 new string[] { "gameexport" });
             gregCore.UI.GregHudRegistry.Register("gameexport", _exportKey.ToString(), "Export");
             gregCore.UI.GregMenuRegistry.RegisterOpener("gameexport", () => StartExport());

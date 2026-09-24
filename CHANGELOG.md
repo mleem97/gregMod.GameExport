@@ -2,6 +2,13 @@
 
 Format: [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
+## [1.0.2] — 2026-09-24
+
+### Changed
+
+- Export-done toast via GregCore.
+- English strings throughout.
+
 ## [1.0.1] — 2026-09-24
 
 ### Fixed
