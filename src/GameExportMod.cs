@@ -51,7 +51,7 @@ public class GameExportMod : MelonMod
         }
         catch (System.Exception ex)
         {
-            MelonLogger.Warning("[GameExport] Hub-Registrierung fehlgeschlagen: " + ex.GetBaseException().Message);
+            MelonLogger.Warning("[GameExport] Hub registration failed: " + ex.GetBaseException().Message);
         }
     }
 

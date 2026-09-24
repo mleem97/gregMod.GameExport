@@ -37,12 +37,12 @@ public static class GameExporter
         }
         catch (Exception ex)
         {
-            MelonLogger.Error("[GameExport] Zielordner fehlgeschlagen: " + ex.GetBaseException().Message);
+            MelonLogger.Error("[GameExport] Target folder failed: " + ex.GetBaseException().Message);
             try { onDone?.Invoke(); } catch { }
             yield break;
         }
 
-        MelonLogger.Msg("[GameExport] Ziel: " + dir);
+        MelonLogger.Msg("[GameExport] Target: " + dir);
         yield return null;
         yield return WriteSection(dir, "README.md", WriteReadme);
         yield return WriteSection(dir, "assemblies.md", WriteAssemblies);
@@ -52,8 +52,15 @@ public static class GameExporter
         yield return WriteSection(dir, "audio.md", WriteAudio);
         yield return WriteSection(dir, "materials.md", WriteMaterials);
         yield return WriteSection(dir, "dependencies.mmd", WriteDependencies);
-        MelonLogger.Msg("[GameExport] Fertig: " + dir);
+        MelonLogger.Msg("[GameExport] Done: " + dir);
+        if (GregHost.HasCore) NotifyExportDone(dir);
         try { onDone?.Invoke(); } catch { }
+    }
+
+    // Isolated method (JIT split): touches gregCore types, called only behind HasCore.
+    private static void NotifyExportDone(string dir)
+    {
+        try { gregCore.UI.GregNotificationManager.Show("Export done: " + dir, 4f); } catch { }
     }
 
     private static IEnumerator WriteSection(string dir, string file, Func<StringBuilder, IEnumerator> writer)
@@ -72,7 +79,7 @@ public static class GameExporter
             }
         }
         try { File.WriteAllText(Path.Combine(dir, file), sb.ToString()); }
-        catch (Exception ex) { MelonLogger.Warning($"[GameExport] {file} schreiben fehlgeschlagen: {ex.Message}"); }
+        catch (Exception ex) { MelonLogger.Warning($"[GameExport] {file} write failed: {ex.Message}"); }
     }
 
     private static void H(StringBuilder sb, string title)
@@ -273,7 +280,7 @@ public static class GameExporter
         H(sb, "Shop-Katalog");
         global::Il2Cpp.ComputerShop[] shops = null;
         try { shops = UnityEngine.Object.FindObjectsOfType<global::Il2Cpp.ComputerShop>(); }
-        catch (Exception ex) { sb.Append("Fehler: " + Safe(ex.Message) + "\n"); yield break; }
+        catch (Exception ex) { sb.Append("Error: " + Safe(ex.Message) + "\n"); yield break; }
         {
             if (shops == null || shops.Length == 0) { sb.Append("Kein ComputerShop in Szene.\n"); yield break; }
             foreach (var shop in shops)
@@ -360,7 +367,7 @@ public static class GameExporter
                 }
             }
         }
-        catch (Exception ex) { sb.Append("Fehler: " + Safe(ex.Message) + "\n"); }
+        catch (Exception ex) { sb.Append("Error: " + Safe(ex.Message) + "\n"); }
         yield break;
     }
 
@@ -395,7 +402,7 @@ public static class GameExporter
                 catch { sb.Append($"- {f}: ?\n"); }
             }
         }
-        catch (Exception ex) { sb.Append("Fehler: " + Safe(ex.Message) + "\n"); }
+        catch (Exception ex) { sb.Append("Error: " + Safe(ex.Message) + "\n"); }
         yield break;
     }
 
