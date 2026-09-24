@@ -10,11 +10,11 @@ using UnityEngine.SceneManagement;
 
 namespace greg.Mods.GameExport.Core;
 
-// VanillaReferenz-Export nach ~/GameExport/{timestamp}/.
-// Struktur folgt gregsPorter.md: Assembly -> Namespace -> Type -> Member
-// und Scene -> GameObject -> Component (+ Shop, Input, Audio, Abhaengigkeiten).
-// Alles gedeckelt + try/catch pro Einheit (obfuscation-/stripping-sicher).
-// Laeuft als Coroutine (Slices pro Frame, kein Dauer-Hitch).
+// Vanilla reference export to ~/GameExport/{timestamp}/.
+// Layout follows gregsPorter.md: Assembly -> Namespace -> Type -> Member
+// and Scene -> GameObject -> Component (+ shop, input, audio, dependencies).
+// All capped + try/catch per unit (obfuscation/stripping safe).
+// Runs as coroutine (slices per frame, no long hitch).
 public static class GameExporter
 {
     private const int MaxTypes = 1500;
@@ -37,12 +37,12 @@ public static class GameExporter
         }
         catch (Exception ex)
         {
-            MelonLogger.Error("[GameExport] Zielordner fehlgeschlagen: " + ex.GetBaseException().Message);
+            MelonLogger.Error("[GameExport] Target folder failed: " + ex.GetBaseException().Message);
             try { onDone?.Invoke(); } catch { }
             yield break;
         }
 
-        MelonLogger.Msg("[GameExport] Ziel: " + dir);
+        MelonLogger.Msg("[GameExport] Target: " + dir);
         yield return null;
         yield return WriteSection(dir, "README.md", WriteReadme);
         yield return WriteSection(dir, "assemblies.md", WriteAssemblies);
@@ -52,7 +52,7 @@ public static class GameExporter
         yield return WriteSection(dir, "audio.md", WriteAudio);
         yield return WriteSection(dir, "materials.md", WriteMaterials);
         yield return WriteSection(dir, "dependencies.mmd", WriteDependencies);
-        MelonLogger.Msg("[GameExport] Fertig: " + dir);
+        MelonLogger.Msg("[GameExport] Done: " + dir);
         try { onDone?.Invoke(); } catch { }
     }
 
@@ -72,7 +72,7 @@ public static class GameExporter
             }
         }
         try { File.WriteAllText(Path.Combine(dir, file), sb.ToString()); }
-        catch (Exception ex) { MelonLogger.Warning($"[GameExport] {file} schreiben fehlgeschlagen: {ex.Message}"); }
+        catch (Exception ex) { MelonLogger.Warning($"[GameExport] {file} write failed: {ex.Message}"); }
     }
 
     private static void H(StringBuilder sb, string title)
@@ -90,23 +90,23 @@ public static class GameExporter
     // ---- README ----
     private static IEnumerator WriteReadme(StringBuilder sb)
     {
-        H(sb, "VanillaReferenz");
+        H(sb, "VanillaReference");
         sb.Append($"Export: {DateTime.Now:yyyy-MM-dd HH:mm:ss}\n\n");
-        try { sb.Append($"Spiel: {Application.productName} {Application.version} (Unity {Application.unityVersion})\n\n"); } catch { }
+        try { sb.Append($"Game: {Application.productName} {Application.version} (Unity {Application.unityVersion})\n\n"); } catch { }
         try
         {
             var scene = SceneManager.GetActiveScene();
-            sb.Append($"Aktive Szene: {Safe(scene.name)} (Build-Index {scene.buildIndex})\n\n");
+            sb.Append($"Active scene: {Safe(scene.name)} (build index {scene.buildIndex})\n\n");
         }
         catch { }
-        sb.Append("## Dateien\n\n");
-        sb.Append("- assemblies.md — Assembly-CSharp: Namespace -> Typ -> Member\n");
-        sb.Append("- scene.md — Szenen-Hierarchie: GameObject -> Transform -> Components\n");
-        sb.Append("- shop-catalog.md — Shop-Items (ID/Name/Preis/Typ)\n");
+        sb.Append("## Files\n\n");
+        sb.Append("- assemblies.md — Assembly-CSharp: namespace -> type -> member\n");
+        sb.Append("- scene.md — scene hierarchy: GameObject -> Transform -> Components\n");
+        sb.Append("- shop-catalog.md — shop items (ID/name/price/type)\n");
         sb.Append("- input.md — InputDevices + PlayerInput-Maps\n");
-        sb.Append("- audio.md — AudioManager-Clips + Quellen\n");
-        sb.Append("- materials.md — Renderer/Material/Shader/Textur-Inventar\n");
-        sb.Append("- dependencies.mmd — Mermaid: Mods/Plugins -> Assembly-Referenzen\n");
+        sb.Append("- audio.md — AudioManager clips + sources\n");
+        sb.Append("- materials.md — renderer/material/shader/texture inventory\n");
+        sb.Append("- dependencies.mmd — Mermaid: mods/plugins -> assembly references\n");
         yield break;
     }
 
@@ -123,11 +123,11 @@ public static class GameExporter
             }
         }
         catch { }
-        if (target == null) { sb.Append("Assembly-CSharp nicht gefunden.\n"); yield break; }
+        if (target == null) { sb.Append("Assembly-CSharp not found.\n"); yield break; }
         Type[] types;
         try { types = target.GetTypes(); }
         catch (ReflectionTypeLoadException ex) { types = ex.Types; }
-        catch { sb.Append("Typen nicht lesbar.\n"); yield break; }
+        catch { sb.Append("Types unreadable.\n"); yield break; }
         var byNs = new SortedDictionary<string, List<Type>>(StringComparer.Ordinal);
         int total = 0;
         foreach (var t in types)
@@ -143,7 +143,7 @@ public static class GameExporter
             catch { }
             if (total % SliceTypes == 0) yield return null;
         }
-        sb.Append($"Typen: {total} (gedeckelt)\n\n");
+        sb.Append($"Types: {total} (capped)\n\n");
         foreach (var kv in byNs)
         {
             sb.Append($"## {Safe(kv.Key)}\n\n");
@@ -191,10 +191,10 @@ public static class GameExporter
         sb.Append("\n");
     }
 
-    // ---- Szene ----
+    // ---- Scene ----
     private static IEnumerator WriteScene(StringBuilder sb)
     {
-        H(sb, "Szene");
+        H(sb, "Scene");
         GameObject[] roots = null;
         string sceneName = "?";
         try
@@ -205,10 +205,10 @@ public static class GameExporter
         }
         catch (Exception ex)
         {
-            sb.Append("Szene nicht lesbar: " + Safe(ex.Message) + "\n");
+            sb.Append("Scene unreadable: " + Safe(ex.Message) + "\n");
             yield break;
         }
-        sb.Append($"Szene: {Safe(sceneName)}, Root-Objekte: {(roots != null ? roots.Length : 0)}\n\n");
+        sb.Append($"Scene: {Safe(sceneName)}, root objects: {(roots != null ? roots.Length : 0)}\n\n");
         int count = 0;
         if (roots != null)
         {
@@ -216,10 +216,10 @@ public static class GameExporter
             {
                 count = DumpNode(sb, r, 0, count);
                 if (count % SliceNodes == 0) yield return null;
-                if (count >= MaxSceneNodes) { sb.Append("\n...(gedeckelt)\n"); break; }
+                if (count >= MaxSceneNodes) { sb.Append("\n...(capped)\n"); break; }
             }
         }
-        sb.Append($"\nKnoten gesamt: {count}\n");
+        sb.Append($"\nTotal nodes: {count}\n");
         yield break;
     }
 
@@ -270,22 +270,22 @@ public static class GameExporter
     // ---- Shop ----
     private static IEnumerator WriteShop(StringBuilder sb)
     {
-        H(sb, "Shop-Katalog");
+        H(sb, "Shop catalog");
         global::Il2Cpp.ComputerShop[] shops = null;
         try { shops = UnityEngine.Object.FindObjectsOfType<global::Il2Cpp.ComputerShop>(); }
-        catch (Exception ex) { sb.Append("Fehler: " + Safe(ex.Message) + "\n"); yield break; }
+        catch (Exception ex) { sb.Append("Error: " + Safe(ex.Message) + "\n"); yield break; }
         {
-            if (shops == null || shops.Length == 0) { sb.Append("Kein ComputerShop in Szene.\n"); yield break; }
+            if (shops == null || shops.Length == 0) { sb.Append("No ComputerShop in scene.\n"); yield break; }
             foreach (var shop in shops)
             {
                 if (shop == null) continue;
                 string shopName = "?";
                 try { shopName = shop.gameObject != null ? shop.gameObject.name : "?"; } catch { }
                 sb.Append($"## Shop: {Safe(shopName)}\n\n");
-                sb.Append("| ID | Name | Preis | Typ |\n|---|---|---|---|\n");
+                sb.Append("| ID | Name | Price | Type |\n|---|---|---|---|\n");
                 object itemsObj = null;
                 try { itemsObj = shop.shopItems; } catch { itemsObj = null; }
-                if (itemsObj == null) { sb.Append("(keine Items)\n"); continue; }
+                if (itemsObj == null) { sb.Append("(no items)\n"); continue; }
                 var items = (Il2CppInterop.Runtime.InteropTypes.Arrays.Il2CppReferenceArray<global::Il2Cpp.ShopItem>)itemsObj;
                 int n = 0;
                 try { n = items.Length; } catch { }
@@ -321,13 +321,13 @@ public static class GameExporter
             var kb = UnityEngine.InputSystem.Keyboard.current;
             var ms = UnityEngine.InputSystem.Mouse.current;
             var gp = UnityEngine.InputSystem.Gamepad.current;
-            sb.Append($"Devices: Keyboard={(kb != null ? "ja" : "nein")}, Mouse={(ms != null ? "ja" : "nein")}, Gamepad={(gp != null ? "ja" : "nein")}\n\n");
+            sb.Append($"Devices: Keyboard={(kb != null ? "yes" : "no")}, Mouse={(ms != null ? "yes" : "no")}, Gamepad={(gp != null ? "yes" : "no")}\n\n");
         }
         catch { }
         try
         {
             var pis = UnityEngine.Object.FindObjectsOfType<UnityEngine.InputSystem.PlayerInput>();
-            sb.Append($"PlayerInput-Komponenten: {(pis != null ? pis.Length : 0)}\n\n");
+            sb.Append($"PlayerInput components: {(pis != null ? pis.Length : 0)}\n\n");
             if (pis != null)
             {
                 int shown = 0;
@@ -337,7 +337,7 @@ public static class GameExporter
                     try
                     {
                         string go = pi.gameObject != null ? pi.gameObject.name : "?";
-                        sb.Append($"- {Safe(go)}: Aktionen=");
+                        sb.Append($"- {Safe(go)}: Actions=");
                         try
                         {
                             var asset = pi.actions;
@@ -360,7 +360,7 @@ public static class GameExporter
                 }
             }
         }
-        catch (Exception ex) { sb.Append("Fehler: " + Safe(ex.Message) + "\n"); }
+        catch (Exception ex) { sb.Append("Error: " + Safe(ex.Message) + "\n"); }
         yield break;
     }
 
@@ -375,7 +375,7 @@ public static class GameExporter
             try
             {
                 var src = mgr.musicAudioSource;
-                sb.Append($"musicAudioSource: {(src != null ? "vorhanden" : "null")}\n");
+                sb.Append($"musicAudioSource: {(src != null ? "present" : "null")}\n");
                 if (src != null)
                 {
                     try { sb.Append($"  volume={src.volume}, loop={src.loop}, clip={(src.clip != null ? src.clip.name : "-")}\n"); } catch { }
@@ -395,14 +395,14 @@ public static class GameExporter
                 catch { sb.Append($"- {f}: ?\n"); }
             }
         }
-        catch (Exception ex) { sb.Append("Fehler: " + Safe(ex.Message) + "\n"); }
+        catch (Exception ex) { sb.Append("Error: " + Safe(ex.Message) + "\n"); }
         yield break;
     }
 
     // ---- Materials ----
     private static IEnumerator WriteMaterials(StringBuilder sb)
     {
-        H(sb, "Materials/Texturen/Meshes (Szene, gedeckelt)");
+        H(sb, "Materials/textures/meshes (scene, capped)");
         var seen = new HashSet<string>(StringComparer.Ordinal);
         int renderers = 0, mats = 0;
         Renderer[] all = null;
@@ -449,7 +449,7 @@ public static class GameExporter
                 catch { }
                 if (renderers % SliceNodes == 0) yield return null;
             }
-            sb.Append($"Renderer: {renderers}, eindeutige Combos: {lines.Count}\n\n");
+            sb.Append($"Renderers: {renderers}, unique combos: {lines.Count}\n\n");
             foreach (var l in lines) sb.Append(l).Append("\n");
             mats = lines.Count;
         }

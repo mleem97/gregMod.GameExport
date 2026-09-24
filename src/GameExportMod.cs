@@ -18,7 +18,7 @@ public class GameExportMod : MelonMod
     {
         var cat = MelonPreferences.CreateCategory("GameExport");
         EnabledEntry = cat.CreateEntry("Enabled", true, "Enabled",
-            "Exportiert die VanillaReferenz nach ~/GameExport/{timestamp}/.");
+            "Exports the vanilla reference to ~/GameExport/{timestamp}/.");
         ExportKeyEntry = cat.CreateEntry("ExportKey", "F12", "ExportKey",
             "Hotkey to export the vanilla reference.");
         try
@@ -30,15 +30,15 @@ public class GameExportMod : MelonMod
                 MelonLogger.Warning($"[GameExport] Unknown ExportKey '{ExportKeyEntry.Value}', defaulting to F12.");
         }
         catch { }
-        MelonLogger.Msg($"[GameExport] Bereit. {_exportKey} = Export nach ~/GameExport/{{timestamp}}/.");
+        MelonLogger.Msg($"[GameExport] Ready. {_exportKey} = export to ~/GameExport/{{timestamp}}/.");
         if (GregHost.HasCore)
         {
             try { RegisterCoreExtras(); } catch { }
         }
     }
 
-    // Mod-Vertrag + Tasten-HUD + Oeffner fuers F1-Hub. Nur mit gregCore
-    // aufrufen (eigene Methode wegen JIT-Trennung ohne gregCore-DLL).
+    // Mod contract + key HUD + opener for F1 hub. Call only with gregCore
+    // (own method for JIT split without gregCore DLL).
     private static void RegisterCoreExtras()
     {
         try
@@ -51,7 +51,7 @@ public class GameExportMod : MelonMod
         }
         catch (System.Exception ex)
         {
-            MelonLogger.Warning("[GameExport] Hub-Registrierung fehlgeschlagen: " + ex.GetBaseException().Message);
+            MelonLogger.Warning("[GameExport] Hub registration failed: " + ex.GetBaseException().Message);
         }
     }
 
@@ -62,7 +62,7 @@ public class GameExportMod : MelonMod
         try { if (EnabledEntry != null) enabled = EnabledEntry.Value; } catch { }
         if (!enabled) return;
         _exporting = true;
-        MelonLogger.Msg("[GameExport] Export startet ...");
+        MelonLogger.Msg("[GameExport] Export starting ...");
         try { MelonCoroutines.Start(GameExporter.Run(() => { _exporting = false; })); }
         catch { _exporting = false; }
     }
